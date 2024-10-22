@@ -2,26 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\Interfaces\MenuInterface;
-use App\Http\Requests\MenuRequest;
-use App\Models\Menu;
 use Exception;
+use App\Models\Menu;
 use Illuminate\Http\Request;
+use App\Services\MenuService;
 use App\Traits\ResponseTrait;
+use App\Http\Requests\MenuRequest;
+use App\Contracts\Interfaces\MenuInterface;
+use Illuminate\Support\Facades\Validator;
+
+
 
 class MenuController extends Controller
 {
 
     use ResponseTrait;
+
+    private MenuInterface $menu;
+    private MenuService $service;
     /**
      * Constructor.
      *
      * @param  App\Contracts\Interfaces\MenuInterface  $example
      * @return void
      */
-    public function __construct(
-        private MenuInterface $menu
-    ){
+    public function __construct(MenuInterface $menu, MenuService $service)
+    {
+        $this->menu = $menu;
+        $this->service = $service;
     }
 
     /**
@@ -43,13 +51,24 @@ class MenuController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(MenuRequest $request)
+    public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'image' => 'required|image|mimes:jpg,png,jpeg,gif|max:5000',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation error', 422, $validator->errors());
+        }
+
         try {
-            $data = $this->menu->store($request->validated());
-            return $this->successResponse('Success store data', $data);
-        } catch(Exception $e)
-        {
+            $store = $this->service->store($request);
+
+            $this->menu->store($store);
+
+            return $this->successResponse('Success store data', $store);
+        } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
@@ -66,8 +85,7 @@ class MenuController extends Controller
         try {
             $data = $this->menu->update($id, $request->validated());
             return $this->successResponse('Success update data!', $data);
-        } catch (\Throwable $e)
-        {
+        } catch (\Throwable $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
@@ -80,11 +98,15 @@ class MenuController extends Controller
      */
     public function destroy($id)
     {
+        $menu = $this->menu->find($id);
+
         try {
             $data = $this->menu->delete($id);
+
+            $this->service->remove($menu->image);
+
             return $this->successResponse('Success Delete data!', $data);
-        } catch (\Throwable $e)
-        {
+        } catch (\Throwable $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }
     }

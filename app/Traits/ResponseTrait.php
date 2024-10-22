@@ -30,13 +30,13 @@ trait ResponseTrait
      * @param mixed|null $data datanya, jika ada.
      * @return \Illuminate\Http\JsonResponse response JSON.
      */
-    public function errorResponse(string $message, int $error_code, mixed $data = null): JsonResponse
-    {
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-            'error_code' => $error_code,
-            'data' => $data
-        ]);
-    }
+    public function errorResponse(string $message, int $error_code, mixed $data = null, mixed $errors = null): JsonResponse
+        {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+                'error_code' => $error_code,
+                'data' => $data
+            ]);
+        }
 }

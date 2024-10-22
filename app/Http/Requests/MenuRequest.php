@@ -22,14 +22,16 @@ class MenuRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required'
+            'name' => 'required|min:3',
+            'image' => ['mimes:jpg,png,jpeg','max:5000', $this->method() == 'PUT' ? 'nullable' : 'required']
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama Makanan harus diisi!'
+            'name.required' => 'Nama Makanan harus diisi!',
+            'image.mimes' => 'File harus berupa jpg,png,jpeg'
         ];
     }
 }
