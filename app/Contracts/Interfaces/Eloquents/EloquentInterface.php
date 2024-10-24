@@ -15,8 +15,7 @@ GetInterface,
 ShowInterface,
 StoreInterface,
 UpdateInterface,
-DeleteInterface,
-FindInterface
+DeleteInterface
 {
 
 }

@@ -14,9 +14,6 @@ class MenuRepository extends BaseRepository implements MenuInterface
         $this->model = $model;
     }
 
-    public function find($id): mixed
-    {
-        return $this->model->find($id);
-    }
+    
 }
 

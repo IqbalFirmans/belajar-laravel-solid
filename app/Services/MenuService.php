@@ -6,6 +6,7 @@ use App\Traits\UploadTrait;
 use Illuminate\Http\Request;
 use App\Enums\UploadDiskEnum;
 use App\Http\Requests\MenuRequest;
+use Illuminate\Support\Facades\Validator;
 use App\Contracts\Repositories\MenuRepository;
 use App\Contracts\Interfaces\Uploads\CustomUploadValidation;
 use App\Contracts\Interfaces\Uploads\ShouldHandleFileUpload;
@@ -40,6 +41,14 @@ class MenuService implements ShouldHandleFileUpload, CustomUploadValidation
 
     public function store(Request $request): array|bool
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'image' => 'required|image|mimes:jpg,png,jpeg,gif|max:5000',
+        ]);
+
+        if ($validator->fails()) {
+            throw new \Illuminate\Validation\ValidationException($validator);
+        }
 
         return [
             'name' => $request['name'],
@@ -55,21 +64,18 @@ class MenuService implements ShouldHandleFileUpload, CustomUploadValidation
      * @return array|bool
      */
 
-    public function update(MenuRequest $request, Menu $menu): array|bool
-    {
-        $validateData = $request->validated();
+     public function update(MenuRequest $request, Menu $menu): array|bool
+     {
+         $old_image = $menu->image;
 
-        $old_image = $menu->image;
+         if ($request->hasFile('image')) {
+             $this->remove($old_image);
+             $old_image = $this->upload(UploadDiskEnum::IMAGES->value, $request->file('image'));
+         }
 
-        if ($request->hash_file('image')) {
-            $this->remove($old_image);
-            $old_image = $this->upload(UploadDiskEnum::IMAGES->value, $request->file('image'));
-        }
-
-        return [
-            'name' => $validateData['name'],
-            'image' => $old_image
-        ];
-    }
-
+         return [
+             'name' => $request['name'],
+             'image' => $old_image
+         ];
+     }
 }
