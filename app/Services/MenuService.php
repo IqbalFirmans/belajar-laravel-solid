@@ -41,15 +41,6 @@ class MenuService implements ShouldHandleFileUpload, CustomUploadValidation
 
     public function store(Request $request): array|bool
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'image' => 'required|image|mimes:jpg,png,jpeg,gif|max:5000',
-        ]);
-
-        if ($validator->fails()) {
-            throw new \Illuminate\Validation\ValidationException($validator);
-        }
-
         return [
             'name' => $request['name'],
             'image' => $this->upload(UploadDiskEnum::IMAGES->value, $request->file('image'))
@@ -78,4 +69,6 @@ class MenuService implements ShouldHandleFileUpload, CustomUploadValidation
              'image' => $old_image
          ];
      }
+
+
 }

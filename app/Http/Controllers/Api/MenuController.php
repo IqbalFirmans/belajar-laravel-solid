@@ -105,7 +105,7 @@ class MenuController extends Controller
             $data = $this->menu->delete($menu->id);
 
             $this->service->remove($menu->image);
-
+ 
             return $this->successResponse('Success Delete data!', $data);
         } catch (\Throwable $e) {
             return $this->errorResponse($e->getMessage(), 500);
