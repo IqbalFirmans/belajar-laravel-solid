@@ -28,11 +28,31 @@ class MenuController extends Controller
         $this->service = $service;
     }
 
+    public function index()
+    {
+        $data = $this->menu->get();
+
+        return view('menu.index', compact('data'));
+    }
+
+    public function create()
+    {
+        return view('menu.create');
+    }
+
     public function edit(Menu $menu)
     {
         return view('menu.edit', compact('menu'));
     }
 
+    public function store(MenuRequest $request)
+    {
+        $store = $this->service->store($request);
+
+        $this->menu->store($store);
+
+        return to_route('menu.index')->with('success', 'Create menu Success!');
+    }
 
     public function update(MenuRequest $request, Menu $menu)
     {
@@ -40,6 +60,16 @@ class MenuController extends Controller
 
         $this->menu->update($menu->id, $update);
 
-        return to_route('menus.edit', request('menu'))->with('success', 'Update data berhasil!');
+        return to_route('menu.index')->with('success', 'Update data berhasil!');
     }
+
+    public function destroy(Menu $menu)
+    {
+        $this->menu->delete($menu->id);
+
+        $this->service->remove($menu->image);
+
+        return to_route('menu.index')->with('success', 'Delete menu Success!');
+    }
+
 }
